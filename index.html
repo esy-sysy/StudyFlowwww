@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyFlow - Pengelola Tugas dan Jadwal Harian</title>
+    <link rel="stylesheet"
+href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=VT323&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+<div class="app-container">
+
+    <!-- Header -->
+    <div class="header">
+        <div>
+            <h1>StudyFlow</h1>
+            <p>Kelola tugas dan jadwal harianmu.</p>
+        </div>
+
+        <button id="themeToggle">🌙</button>
+    </div>
+
+    <!-- Statistik -->
+    <div class="stats-container">
+
+        <div class="stat-card">
+            <h3 id="totalTasks">0</h3>
+            <p>Total Tugas</p>
+        </div>
+
+        <div class="stat-card">
+            <h3 id="completedTasks">0</h3>
+            <p>Selesai</p>
+        </div>
+
+        <div class="stat-card">
+            <h3 id="todaySchedule">0</h3>
+            <p>Jadwal Hari Ini</p>
+        </div>
+
+        <div class="stat-card">
+            <h3 id="progressPercent">0%</h3>
+            <p>Progress</p>
+        </div>
+
+    </div>
+
+    <!-- Progress -->
+    <div class="progress-card">
+
+        <div class="progress-header">
+            <span>Progress Keseluruhan</span>
+            <span id="progressText">0%</span>
+        </div>
+
+        <div class="progress-bar">
+            <div id="progressFill"></div>
+        </div>
+
+    </div>
+
+    <!-- Search -->
+    <div class="search-box">
+
+        <input
+            type="text"
+            id="searchInput"
+            placeholder="🔍 Cari tugas..."
+            onkeyup="renderTasks()">
+
+    </div>
+
+    <!-- Tab -->
+    <div class="tab-container">
+
+        <button id="taskTab" class="tab-btn active">
+            📋 Kelola Tugas
+        </button>
+
+        <button id="scheduleTab" class="tab-btn">
+            📅 Jadwal Harian
+        </button>
+
+    </div>
+
+    <!-- Filter -->
+    <div class="filter-container">
+
+        <button class="filter-btn active" onclick="setFilter('all',this)">
+            Semua
+        </button>
+
+        <button class="filter-btn" onclick="setFilter('active',this)">
+            Belum Selesai
+        </button>
+
+        <button class="filter-btn" onclick="setFilter('completed',this)">
+            Selesai
+        </button>
+
+    </div>
+
+    <!-- Daftar Tugas -->
+    <div id="taskSection">
+        <div class="task-grid" id="taskContainer"></div>
+    </div>
+
+    <!-- Jadwal -->
+    <div id="scheduleSection" style="display:none;">
+        <div class="task-grid" id="scheduleContainer"></div>
+    </div>
+
+    <!-- Tombol Tambah -->
+    <div class="fab" id="fabButton">
+        +
+    </div>
+
+</div>
+
+<!-- ================= MODAL TAMBAH TUGAS ================= -->
+
+<div class="modal" id="taskModal">
+
+    <div class="modal-content">
+
+        <h3 id="formTitle">Tambah Tugas</h3>
+
+        <input
+            type="text"
+            id="taskName"
+            placeholder="Nama Tugas">
+
+        <input
+            type="text"
+            id="taskSubject"
+            placeholder="Mata Kuliah">
+
+        <textarea
+            id="taskDesc"
+            placeholder="Deskripsi"></textarea>
+
+        <input
+            type="datetime-local"
+            id="taskDeadline">
+
+        <button
+            class="btn btn-save"
+            onclick="saveTask()">
+            Simpan
+        </button>
+
+        <button
+            class="btn btn-close"
+            onclick="closeActiveModal('taskModal')">
+            Batal
+        </button>
+
+    </div>
+
+</div>
+
+<!-- ================= MODAL DETAIL ================= -->
+
+<div class="modal" id="detailModal">
+
+    <div class="modal-content">
+
+        <h2 id="detailTitle">Nama Tugas</h2>
+
+        <p id="detailDesc">
+            Deskripsi tugas
+        </p>
+
+        <div class="info-grid">
+
+            <div>Dibuat</div>
+            <span id="detailCreated">-</span>
+
+            <div>Mata Kuliah</div>
+            <span id="detailSubject">-</span>
+
+            <div>Deadline</div>
+            <span id="detailDate">-</span>
+
+            <div>Jam</div>
+            <span id="detailTime">-</span>
+
+        </div>
+
+        <button
+            class="btn btn-save"
+            onclick="toggleTaskStatus()">
+
+            Tandai Selesai
+
+        </button>
+
+        <button
+            class="btn btn-save"
+            onclick="openEditModal()">
+
+            Edit
+
+        </button>
+
+        <button
+            class="btn btn-delete"
+            onclick="deleteTask()">
+
+            Hapus
+
+        </button>
+
+        <button
+            class="btn btn-close"
+            onclick="closeActiveModal('detailModal')">
+
+            Tutup
+
+        </button>
+
+    </div>
+
+</div>
+
+<!-- ================= MODAL JADWAL ================= -->
+
+<div class="modal" id="scheduleModal">
+
+    <div class="modal-content">
+
+        <h3>Tambah Jadwal</h3>
+
+        <input
+            type="text"
+            id="scheduleName"
+            placeholder="Nama Kegiatan">
+
+       <div class="days-box">
+
+        <label><input type="checkbox" value="Senin"> Senin</label>
+        <label><input type="checkbox" value="Selasa"> Selasa</label>
+        <label><input type="checkbox" value="Rabu"> Rabu</label>
+        <label><input type="checkbox" value="Kamis"> Kamis</label>
+        <label><input type="checkbox" value="Jumat"> Jumat</label>
+        <label><input type="checkbox" value="Sabtu"> Sabtu</label>
+        <label><input type="checkbox" value="Minggu"> Minggu</label>
+
+</div>
+        <input
+            type="time"
+            id="scheduleTime">
+
+        <button
+            class="btn btn-save"
+            onclick="saveSchedule()">
+
+            Simpan
+
+        </button>
+
+        <button
+            class="btn btn-close"
+            onclick="closeActiveModal('scheduleModal')">
+
+            Batal
+
+        </button>
+
+    </div>
+
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
